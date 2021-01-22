@@ -11,7 +11,9 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private Button searchCity;
     private RecyclerView mRecyclerView;
     private DataAdapter mDataAdapter;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         final Double[] lon = new Double[1];
         final List<RestaurantDetails>[] myList = new List[]{new ArrayList<>()};
         enterCity=(EditText)findViewById(R.id.enter_city);
+        mProgressBar=(ProgressBar)findViewById(R.id.progressBar);
         searchCity=(Button)findViewById(R.id.search);
         mRecyclerView=(RecyclerView)findViewById(R.id.recycler_view);
         final GetDataService getDataService=RetrofitInstance.getRetrofitInstance().create(GetDataService.class);
@@ -43,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 InputMethodManager inputMethodManager=(InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputMethodManager.hideSoftInputFromWindow(mRecyclerView.getWindowToken(),0);
+                mProgressBar.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.GONE);
                 Call<CityDetails> call=getDataService.getLocation(enterCity.getText().toString(),null,null,null);
                 call.enqueue(new Callback<CityDetails>() {
                     @Override
@@ -58,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
                             public void onResponse(Call<RestaurantResponse> call, Response<RestaurantResponse> response1) {
                                 Log.d("location",response1.body().getRestaurants().get(0).getRestaurant().getLocation().getAddress());
                                 Log.d("city",response1.body().getRestaurants().get(0).getRestaurant().getLocation().getCity());
+                                mProgressBar.setVisibility(View.GONE);
+                                mRecyclerView.setVisibility(View.VISIBLE);
                                 myList[0] =response1.body().getRestaurants();
                                 mDataAdapter=new DataAdapter(getApplicationContext(),myList);
                                 RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(getApplicationContext());
@@ -67,18 +75,16 @@ public class MainActivity extends AppCompatActivity {
 
                             @Override
                             public void onFailure(Call<RestaurantResponse> call, Throwable t) {
-
+                                Toast.makeText(getApplicationContext(),"Error 1",Toast.LENGTH_LONG).show();
                             }
                         });
                     }
 
                     @Override
                     public void onFailure(Call<CityDetails> call, Throwable t) {
-
+                        Toast.makeText(getApplicationContext(),"Error 2",Toast.LENGTH_LONG).show();
                     }
                 });
-                Log.d("check1",String.valueOf(lat[0]));
-                Log.d("check2",String.valueOf(lon[0]));
             }
         });
     }
