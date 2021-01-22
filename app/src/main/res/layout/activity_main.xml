@@ -16,10 +16,11 @@
         android:layout_below="@id/enter_city"
         android:text="search"
         android:id="@+id/search"/>
-    <TextView
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/results"
-        android:layout_below="@id/search"/>
+        android:layout_below="@id/search" />
 
 </RelativeLayout>

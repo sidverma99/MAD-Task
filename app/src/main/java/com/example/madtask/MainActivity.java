@@ -1,6 +1,8 @@
 package com.example.madtask;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -20,7 +22,8 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
     private EditText enterCity;
     private Button searchCity;
-    private TextView results;
+    private RecyclerView mRecyclerView;
+    private DataAdapter mDataAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +31,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final Double[] lat = new Double[1];
         final Double[] lon = new Double[1];
-        List<RestaurantDetails> myList=new ArrayList<>();
+        final List<RestaurantDetails>[] myList = new List[]{new ArrayList<>()};
         enterCity=(EditText)findViewById(R.id.enter_city);
         searchCity=(Button)findViewById(R.id.search);
-        results=(TextView)findViewById(R.id.results);
+        mRecyclerView=(RecyclerView)findViewById(R.id.recycler_view);
         final GetDataService getDataService=RetrofitInstance.getRetrofitInstance().create(GetDataService.class);
         searchCity.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,9 +51,14 @@ public class MainActivity extends AppCompatActivity {
                         Call<RestaurantResponse> call1=getDataService.getRestaurant(null,null,null,null,null, lat[0], lon[0],null,null,null,null,null,null,null);
                         call1.enqueue(new Callback<RestaurantResponse>() {
                             @Override
-                            public void onResponse(Call<RestaurantResponse> call, Response<RestaurantResponse> response) {
-                                Log.d("location",response.body().getRestaurants().get(0).getRestaurant().getLocation().getAddress());
-                                Log.d("city",response.body().getRestaurants().get(0).getRestaurant().getLocation().getCity());
+                            public void onResponse(Call<RestaurantResponse> call, Response<RestaurantResponse> response1) {
+                                Log.d("location",response1.body().getRestaurants().get(0).getRestaurant().getLocation().getAddress());
+                                Log.d("city",response1.body().getRestaurants().get(0).getRestaurant().getLocation().getCity());
+                                myList[0] =response1.body().getRestaurants();
+                                mDataAdapter=new DataAdapter(getApplicationContext(),myList);
+                                RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(getApplicationContext());
+                                mRecyclerView.setLayoutManager(layoutManager);
+                                mRecyclerView.setAdapter(mDataAdapter);
                             }
 
                             @Override
